@@ -1,11 +1,13 @@
 import socket
 import ssl
 import re
+import getpass
+
 
 def print_seperetor():
 	print '---------------------'
 
-class EmailClient:
+class POPRReader:
 	''' A POP3-Based Email reader with SSL '''
 	def __init__(self, user, pwd, debug=False):
 		''' Open socket and login to the server '''
@@ -104,9 +106,9 @@ class EmailClient:
 
 
 def main():
-	username = ''
-	pwd = ''
-	mail = EmailClient(username, pwd, True)
+	username = raw_input('Please Enter Your Username: ')
+	pwd = getpass.getpass('Please Enter Password: ')
+	mail = POPRReader(username, pwd, True)
 	mail.list_mails()
 	mail.quit()
 
