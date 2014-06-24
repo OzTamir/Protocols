@@ -13,7 +13,7 @@ class EmailClient:
 		self.password = pwd
 		self.debug = debug
 		self.sock = self.get_socket()
-		self.login(sock, user, pwd, debug)
+		self.login()
 
 	def get_socket(self, SSL_required=True):
 		''' Create a socket (SSL enabled by default) '''
@@ -30,18 +30,18 @@ class EmailClient:
 		while True:
 			next = self.sock.recv(1)
 			# Read data until a newline is reached
-			if next == '\n':
+			if next == '\n' or data[-2::] == '\r\n':
 				break
 			data += next
 		if self.debug:
 			print data
 		return data
 
-	def send(self, cmd, data='', read_at_end=True):
+	def send(self, cmd, data='', read_at_end=False):
 		''' Send a POP3 command to the email server '''
 		# Compile the message that will be sent to the server
 		if data == '':
-			packet = '%(CMD)s\r\n' % {'CMD' : cmd.upper}
+			packet = '%(CMD)s\r\n' % {'CMD' : cmd.upper()}
 		else:
 			packet = '%(CMD)s %(DATA)s\r\n'	% {'CMD' : cmd.upper(), 'DATA' : str(data)}
 		self.sock.send(packet)
@@ -54,8 +54,8 @@ class EmailClient:
 		# Read the session header (the server connection confirmation)
 		self.read()
 		# Send the username and password (login)
-		self.send('USER', self.username)
-		self.send('PASS', self.password)
+		self.send('USER', self.username, True)
+		self.send('PASS', self.password, True)
 		return
 
 	def quit(self):
@@ -64,13 +64,17 @@ class EmailClient:
 
 	def get_mail(self):
 		''' Fetch the available mails waiting to be read '''
-		sock.send('STAT')
-		data = read(sock).split(' ')
+		self.send('STAT')
+		data = self.read().split(' ')
 		print 'There are %s mails in your inbox.' % data[1]
 
 
 def main():
-	pass
+	username = ''
+	pwd = ''
+	mail = EmailClient(username, pwd, True)
+	mail.get_mail()
+	mail.quit()
 
 
 if __name__ == '__main__':
