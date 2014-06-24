@@ -3,13 +3,14 @@ import ssl
 import getpass
 
 class ProtocolBase(object):
-	def __init__(self, server, port, debug=False):
+	def __init__(self, server, port, debug=False, SSL=True):
 		''' Open socket and login to the server '''
 		self.server = server
 		self.port = int(port)
 		self.username = ''
 		self.password = ''
 		self.debug = debug
+		self.sock = self.get_socket(SSL)
 
 	def get_socket(self, SSL_required=True):
 		''' Create a socket (SSL enabled by default) '''
@@ -28,7 +29,7 @@ class ProtocolBase(object):
 		while True:
 			next = self.sock.recv(1)
 			# Read data until a newline is reached
-			if next == '\n' or data[-2::] == '\r\n':
+			if next == '\n' or data[-2::] == '\r\n' or next == '':
 				break
 			data += next
 		if self.debug and debug:

@@ -3,25 +3,27 @@ import getpass
 import socket
 import ssl
 
+server = 'pop.gmail.com'
+port = 995
+
 def print_seperetor():
 	print '---------------------'
 
-class POPRReader(ProtocolBase):
+class POPClient(ProtocolBase):
 	''' A POP3-Based Email reader with SSL '''
 	def __init__(self, user, pwd, debug=False):
 		''' Open socket and login to the server '''
-		server = 'pop.gmail.com'
-		port = 995
+		global server, port
 		ProtocolBase.__init__(self, server, port, debug)
 		self.username = user
 		self.password = pwd
-		self.sock = self.get_socket()
 		self.login()
 
 	def login(self):
 		''' Login to the server '''
 		# Read the session header (the server connection confirmation)
 		self.read()
+		
 		# Send the username and password (login)
 		self.send('USER', self.username, True)
 		self.send('PASS', self.password, True)
@@ -55,7 +57,6 @@ class POPRReader(ProtocolBase):
 				header[next[0]] = ''.join([char for char in next[1::]]).replace('\r', '')
 		return header
 
-
 	def list_mails(self):
 		amount = self.get_mail_amount()
 		for i in range(amount):
@@ -66,12 +67,10 @@ class POPRReader(ProtocolBase):
 			print_seperetor()
 
 
-
-
 def main():
 	username = raw_input('Please Enter Your Username: ')
 	pwd = getpass.getpass('Please Enter Password: ')
-	mail = POPRReader(username, pwd, True)
+	mail = POPClient(username, pwd, True)
 	mail.list_mails()
 	mail.quit()
 
