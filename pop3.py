@@ -1,7 +1,9 @@
 import socket
 import ssl
+import re
 
-
+def print_seperetor():
+	print '---------------------'
 
 class EmailClient:
 	''' A POP3-Based Email reader with SSL '''
@@ -24,8 +26,10 @@ class EmailClient:
 			return ssl_socket
 		return sock
 
-	def read(self):
+	def read(self, debug=None):
 		''' Read data from the email server '''
+		if debug is None:
+			debug = self.debug
 		data = ''
 		while True:
 			next = self.sock.recv(1)
@@ -33,7 +37,7 @@ class EmailClient:
 			if next == '\n' or data[-2::] == '\r\n':
 				break
 			data += next
-		if self.debug:
+		if self.debug and debug:
 			print data
 		return data
 
@@ -62,18 +66,48 @@ class EmailClient:
 		''' End the session '''
 		self.send('QUIT')
 
-	def get_mail(self):
+	def get_mail_amount(self):
 		''' Fetch the available mails waiting to be read '''
 		self.send('STAT')
 		data = self.read().split(' ')
 		print 'There are %s mails in your inbox.' % data[1]
+		print_seperetor()
+		return int(data[1])
+
+	def parse_header(self):
+		''' Return a dictionary with email header '''
+		header = dict()
+		# Flush out the +OK response
+		self.read(False)
+		while True:
+			next = self.read(False)
+			if next[0] == '.':
+				break
+			elif next[:2] == '--':
+				continue
+			else:
+				next = next.split(': ')
+				header[next[0]] = ''.join([char for char in next[1::]]).replace('\r', '')
+		return header
+
+
+	def list_mails(self):
+		amount = self.get_mail_amount()
+		for i in range(amount):
+			self.send('TOP', str(i + 1) + ' 1')
+			header = self.parse_header()
+			print 'Subject: %s' % header.get('Subject', 'NULL')
+			print 'Sender: %s' % header.get('From', 'NULL')
+			print_seperetor()
+
+
 
 
 def main():
 	username = ''
 	pwd = ''
 	mail = EmailClient(username, pwd, True)
-	mail.get_mail()
+	mail.list_mails()
 	mail.quit()
 
 
