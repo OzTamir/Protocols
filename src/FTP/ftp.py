@@ -21,7 +21,7 @@ class FTPPassiveClient:
 
 	def connect(self):
 		''' Connect to the server on the listining port '''
-		if self.addr == '' or port == 0:
+		if self.addr == '' or self.port == 0:
 			print 'ERROR: PASV Mode not enabled'
 			return
 		if self.connected:
@@ -45,7 +45,7 @@ class FTPPassiveClient:
 
 	def ftp_read(self, size):
 		''' When entering PASV mode, the FTP server wait for a client to connect and read the output from the last commands '''
-		if self.addr == '' or port == 0:
+		if self.addr == '' or self.port == 0:
 			print 'ERROR: PASV Mode not enabled'
 			return
 		data = ''

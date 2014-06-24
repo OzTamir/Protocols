@@ -44,9 +44,3 @@ def POP3_demo():
 	mail.list_mails()
 	# Quit
 	mail.quit()
-
-def main():
-	POP3_demo()
-
-if __name__ == '__main__':
-	main()
