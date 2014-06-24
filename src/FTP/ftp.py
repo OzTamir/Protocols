@@ -1,4 +1,4 @@
-from ProtocolBase import ProtocolBase
+from ..ProtocolBase import ProtocolBase
 import getpass
 import socket
 import ssl
@@ -80,16 +80,14 @@ class FTPPassiveClient:
 
 class FTPClient(ProtocolBase):
 	''' A FTP Client '''
-	def __init__(self, user, pwd, debug=False):
-		global server, port
+	def __init__(self, server, port, debug=False):
 		ProtocolBase.__init__(self, server, port, debug, False)
+		self.pasv = FTPPassiveClient()
+
+	def login(self, user, pwd):
+		''' Login to the server '''
 		self.username = user
 		self.password = pwd
-		self.pasv = FTPPassiveClient()
-		self.login()
-
-	def login(self):
-		''' Login to the server '''
 		# Send the username
 		self.send('USER', self.username, True)
 		# Read all the server's messages
@@ -150,26 +148,3 @@ class FTPClient(ProtocolBase):
 		''' Quit the session '''
 		self.pasv.close()
 		self.send('QUIT')
-
-
-def main():
-	''' Short example: Download the index file from a website '''
-	port = 21
-	# Prompt the user to enter his login details
-	server = raw_input('Please enter server address: ')
-	username = raw_input('Please Enter Your Username: ')
-	pwd = getpass.getpass('Please Enter Password: ')
-	ftp = FTPClient(username, pwd, True)
-	# Move to the public_html directory
-	ftp.change_dir('public_html')
-	# Enable passive mode
-	ftp.go_pasv()
-	# Set the type to ascii
-	ftp.send('TYPE', 'A', True)
-	# Download the index file
-	ftp.download_file('index.html')
-	# Quit
-	ftp.quit()
-
-if __name__ == '__main__':
-	main()

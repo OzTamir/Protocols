@@ -1,26 +1,21 @@
-from ProtocolBase import ProtocolBase
+from ..ProtocolBase import ProtocolBase
 import getpass
 import socket
 import ssl
-
-server = 'pop.gmail.com'
-port = 995
 
 def print_seperetor():
 	print '---------------------'
 
 class POPClient(ProtocolBase):
 	''' A POP3-Based Email reader with SSL '''
-	def __init__(self, user, pwd, debug=False):
+	def __init__(self, server, port, debug=False):
 		''' Open socket and login to the server '''
-		global server, port
 		ProtocolBase.__init__(self, server, port, debug)
+
+	def login(self, user, pwd):
+		''' Login to the server '''
 		self.username = user
 		self.password = pwd
-		self.login()
-
-	def login(self):
-		''' Login to the server '''
 		# Read the session header (the server connection confirmation)
 		self.read()
 		
@@ -65,15 +60,3 @@ class POPClient(ProtocolBase):
 			print 'Subject: %s' % header.get('Subject', 'NULL')
 			print 'Sender: %s' % header.get('From', 'NULL')
 			print_seperetor()
-
-
-def main():
-	username = raw_input('Please Enter Your Username: ')
-	pwd = getpass.getpass('Please Enter Password: ')
-	mail = POPClient(username, pwd, True)
-	mail.list_mails()
-	mail.quit()
-
-
-if __name__ == '__main__':
-	main()
